@@ -1,0 +1,57 @@
+body {
+    background: #000;
+    color: #fff;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.appTitle {
+    text-align: center;
+}
+
+/*stats bar and elements*/
+.stats {
+    display: inline-block;
+    padding-right: 3%;
+    margin-top: 15px;
+}
+.toggleDarknessBtn {
+    color: #000;
+    text-align: center;
+    padding: 2px 5px 3px 5px;
+}
+.toggleDarknessBtn:hover {
+    background: #9da0a4;
+}
+
+/*dungeon display*/
+.gameboard {
+    overflow: auto;
+    height: 480px;
+    width: 600px;
+    margin-left: 50%;
+    transform: translate(-50%,0);
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.gameboard::-webkit-scrollbar {
+    display: none;
+}
+
+/*legend*/
+.container {
+    margin-left: 50%;
+    transform: translate(-50%,0);
+    width: 730px;
+}
+.legendRow {
+    line-height: 25px;
+}
+
+/*individual cell*/
+#cell {
+    height: 10px;
+    width: 10px;
+    /*display: block;*/
+    /*float: left;*/
+    border: 1px black solid;
+}
