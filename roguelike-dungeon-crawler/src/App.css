@@ -47,11 +47,14 @@ body {
     line-height: 25px;
 }
 
-/*individual cell*/
-#cell {
+.cell {
     height: 10px;
     width: 10px;
-    /*display: block;*/
-    /*float: left;*/
     border: 1px black solid;
+    display: block;
+    float: left;
+}
+.legendRow > .cell {
+    display: inline-block;
+    float: none;
 }

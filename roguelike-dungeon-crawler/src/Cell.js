@@ -6,7 +6,7 @@ import React from 'react';
 var Cell = React.createClass({
    render: function () {
        return (
-           <div className={this.props.player ? "player" : "basic"} id="cell" style={this.props.style} >
+           <div className="cell" style={this.props.style} /*onKeyDown={this.props.arrowKeyHandler}*/>
 
            </div>
        )
