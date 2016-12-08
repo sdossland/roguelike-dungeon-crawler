@@ -32,11 +32,34 @@ body {
     transform: translate(-50%,0);
     margin-top: 15px;
     margin-bottom: 15px;
+    /*position: relative;*/
+    /*background-color: pink;*/
+    z-index: -1;
+    /*position: relative;*/
 }
 .gameboard::-webkit-scrollbar {
     display: none;
 }
-
+.darkness {
+    /*overflow: auto;*/
+    /*height: 480px;*/
+    /*width: 600px;*/
+    /*margin-left: 50%;*/
+    /*transform: translate(-50%,0);*/
+    /*margin-top: 15px;*/
+    /*margin-bottom: 15px;*/
+    position: absolute;
+    z-index: 1;
+}
+.dark {
+    background-color: #f06;
+}
+.light {
+    background-color: #639;
+}
+/*.darkness::-webkit-scrollbar {*/
+    /*display: none;*/
+/*}*/
 /*legend*/
 .container {
     margin-left: 50%;

@@ -4,6 +4,7 @@
 import React from 'react';
 import Cell from './Cell';
 import { bgColors } from './App';
+import Darkness from './Darkness';
 
 var Gameboard = React.createClass({
     componentDidMount: function() {
@@ -34,7 +35,7 @@ var Gameboard = React.createClass({
             } else if (this.props.cells[x][y].color === '#fc0') { //yellow..weapon
                 this.props.obtainWeapon();
             } else if (this.props.cells[x][y].color === '#c00') { //red..enemy
-
+                //this.props.attackEnemy();
             }
         } /*arrow => down*/
         else if (e.keyCode === 40) {
@@ -68,7 +69,8 @@ var Gameboard = React.createClass({
     },
     render: function() {
         return (
-            <div className="gameboard">
+            <div className="gameboard" >
+                <Darkness darkCells={this.props.darkCells} />
                 {this.props.cells.map(function(row) {
                     return row.map(function(cell) {
                         return (<Cell style={{backgroundColor: cell.color }} />);

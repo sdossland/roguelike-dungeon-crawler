@@ -4,9 +4,9 @@
 import React from 'react';
 
 var Stats = React.createClass({
-    onClickHandler: function () {
-
-    },
+    // toggleDarkness: function() {
+    //     this.props.toggleCell();
+    //     },
     render: function() {
         return (
             <div className="container row">
@@ -16,7 +16,7 @@ var Stats = React.createClass({
                 <div className="stats">Level: {this.props.level}</div>
                 <div className="stats">Next level: {this.props.nextLevel} XP</div>
                 <div className="stats">Dungeon: {this.props.dungeon}</div>
-                <button /*type="button btn btn-default"*/ className="stats toggleDarknessBtn" /*onClick={this.onClickHandler}*/>Toggle Darkness</button>
+                <button /*type="button btn btn-default"*/ className="stats toggleDarknessBtn" onClick={this.props.toggleCell}>Toggle Darkness</button>
             </div>
         )}
 });

@@ -17,7 +17,9 @@ var bgColors = {
     "Red": "#c00", //enemy
     "Yellow": "#fc0", //weapon
     "Purple": "#4d0099", //king
-    "Grey": "#999"
+    "Grey": "#999", //standard
+    "Pink": "#f06", //overlay
+    "PurpleNess": "#639" //noOverlay
 };
 
 var cellDisplay = {
@@ -32,6 +34,20 @@ function calculateCells(numRows, numColumns /*, isActive*/) {
         var row = [];
         for (var j=0; j<numColumns; j++) {
             row.push({ isPlayer: false, color: bgColors['Grey'] /*, isActive: this.isActive*/ });
+        }
+        cellArr.push(row);
+    }
+    return cellArr;
+}
+
+//testing darkness cells
+function calculateDarkCells(numRows, numColumns /*, clicked*/) {
+    var cellArr = [];
+    for (var i=0; i<numRows; i++) {
+        var row = [];
+        for (var j=0; j<numColumns; j++) {
+            //this.clicked = clicked;
+            row.push({ isPlayer: false, /*color: bgColors['Pink'],*/ isActive: true });
         }
         cellArr.push(row);
     }
@@ -99,7 +115,7 @@ var weapon = [
         name: 'large trout',
         attack: 30
     }
-]
+];
 
 var Board = React.createClass({
     getInitialState: function () {
@@ -113,11 +129,13 @@ var Board = React.createClass({
           nextLevel: 60,
           dungeon: 0,
           cells: calculateCells(numRows,numColumns),
+          darkCells: calculateDarkCells(numRows, numColumns),
           playerCurrentPosition: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
           healthCells: calculateHealthAgents(numRows, numColumns),
           enemyCells: calculateEnemies(numRows, numColumns),
           king: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
-          weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]
+          weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+          // clicked: 'dark'
       });
     },
     obtainHealth: function() {
@@ -132,20 +150,20 @@ var Board = React.createClass({
          weaponStats: weaponPickedUp
       });
     },
-    attackEnemy: function(x, y) {
-        var healthReduced = this.state.healthStats - 12;
-        var enemyReduction;
-        for (var i=0; i<weapon.length; i++) {
-            if (weapon[i].name === this.state.weaponStats) {
-                enemyReduction = weapon[i].attack;
-            }
-        }
-        var finalEnemyReduction =  cells[x][y].health - enemyReduction;
-        this.setState({
-           healthStats: healthReduced
-            cells[x][y].health: finalEnemyReduction //need help here! how to access each enemy's health individually
-        });
-     },
+    // attackEnemy: function(x, y) {
+    //     var healthReduced = this.state.healthStats - 12;
+    //     var enemyReduction;
+    //     for (var i=0; i<weapon.length; i++) {
+    //         if (weapon[i].name === this.state.weaponStats) {
+    //             enemyReduction = weapon[i].attack;
+    //         }
+    //     }
+    //     var finalEnemyReduction =  cells[x][y].health - enemyReduction;
+    //     this.setState({
+    //        healthStats: healthReduced
+    //         cells[x][y].health: finalEnemyReduction //need help here! how to access each enemy's health individually
+    //     });
+    //  },
 
     // componentWillMount: function() {
     //     var rows = this.state.numRows,
@@ -173,13 +191,29 @@ var Board = React.createClass({
             playerCurrentPosition: [x, y]
         });
     },
-
+    toggleCell: function() {
+      var darkCells = this.state.darkCells;
+        for (var i=0; i<60; i++) {
+            for (var j=0; j<60; j++) {
+                darkCells[i][j].isActive = !darkCells[i][j].isActive;
+            }
+        }
+        this.setState({ darkCells: darkCells });
+    },
   render: function() {
     return (
         <div>
             <h2 className="appTitle">React Roguelike</h2>
             <h5 className="appTitle">Kill the boss in dungeon 4</h5>
-            <Stats health={this.state.healthStats} weaponStats={this.state.weaponStats} attack={this.state.attack} level={this.state.level} nextLevel={this.state.nextLevel} dungeon={this.state.dungeon} />
+            <Stats health={this.state.healthStats}
+                   weaponStats={this.state.weaponStats}
+                   attack={this.state.attack}
+                   level={this.state.level}
+                   nextLevel={this.state.nextLevel}
+                   dungeon={this.state.dungeon}
+                   clicked={this.state.clicked}
+                   toggleCell={this.toggleCell}
+            />
             <Gameboard cells={this.state.cells}
                        playerCurrentPosition={this.state.playerCurrentPosition}
                        healthCells={this.state.healthCells}
@@ -189,7 +223,10 @@ var Board = React.createClass({
                        updateCells={this.updateCells}
                        movePlayer={this.movePlayer}
                        obtainHealth={this.obtainHealth}
-                       obtainWeapon={this.obtainWeapon} />
+                       obtainWeapon={this.obtainWeapon}
+                       //clicked={this.state.clicked}
+                       darkCells={this.state.darkCells}
+            />
             <Legend />
         </div>
     );
