@@ -18,8 +18,7 @@ var bgColors = {
     "Yellow": "#fc0", //weapon
     "Purple": "#4d0099", //king
     "Grey": "#999", //standard
-    "Pink": "#f06", //overlay
-    "PurpleNess": "#639" //noOverlay
+    "Black": "#000" //noOverlay
 };
 
 var cellDisplay = {
@@ -28,26 +27,26 @@ var cellDisplay = {
     "InlineBlock": 'inline-block'
 };
 
-function calculateCells(numRows, numColumns /*, isActive*/) {
+function calculateCells(numRows, numColumns) {
     var cellArr = [];
     for (var i=0; i<numRows; i++) {
         var row = [];
         for (var j=0; j<numColumns; j++) {
-            row.push({ isPlayer: false, color: bgColors['Grey'] /*, isActive: this.isActive*/ });
+            row.push({ isPlayer: false, color: bgColors['Grey'] });
         }
         cellArr.push(row);
     }
     return cellArr;
 }
 
-//testing darkness cells
-function calculateDarkCells(numRows, numColumns /*, clicked*/) {
+//instead of new function for darkCells, perhaps add the isActive as an option to be input to function??
+function calculateDarkCells(numRows, numColumns /*, isActive*/) {
     var cellArr = [];
     for (var i=0; i<numRows; i++) {
         var row = [];
         for (var j=0; j<numColumns; j++) {
             //this.clicked = clicked;
-            row.push({ isPlayer: false, /*color: bgColors['Pink'],*/ isActive: true });
+            row.push({ isPlayer: false, isActive: false, isScope: false });
         }
         cellArr.push(row);
     }
@@ -192,10 +191,110 @@ var Board = React.createClass({
         });
     },
     toggleCell: function() {
-      var darkCells = this.state.darkCells;
+      var darkCells = this.state.darkCells,
+          row = this.state.playerCurrentPosition[0],
+          col = this.state.playerCurrentPosition[1];
+        console.log(row, col);
+        //row 1
+        for (var k=-5; k<-4; k++) {
+            if (-1<(row + k) && (row + k)<60) {
+                for (var l=-1; l<2; l++) {
+                    if (-1<(col + l) && (col + l)<60) {
+                        darkCells[row + k][col + l].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 2
+        for (var m=-4; m<-3; m++) {
+            if (-1<(row + m) && (row + m)<60) {
+                for (var n=-2; n<3; n++) {
+                    if (-1<(col + m) && (col + m)<60) {
+                        darkCells[row + m][col + n].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 3
+        for (var o=-3; o<-2; o++) {
+            if (-1<(row + o) && (row + o)<60) {
+                for (var p=-3; p<4; p++) {
+                    if (-1<(col + p) && (col + p)<60) {
+                        darkCells[row + o][col + p].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 4
+        for (var q=-2; q<-1; q++) {
+            if (-1<(row + q) && (row + q)<60) {
+                for (var r=-4; r<5; r++) {
+                    if (-1<(col + r) && (col + r)<60) {
+                        darkCells[row + q][col + r].isScope = true;
+                    }
+                }
+            }
+        }
+        //rows 5-7
+        for (var s=-1; s<2; s++) {
+            var newRow = row + s;
+            if (-1<newRow && newRow<60) {
+                for (var t=-5; t<6; t++) {
+                    var newCol = col + t;
+                    if ( -1<newCol && newCol<60 )  {
+                        darkCells[row + s][col + t].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 8
+        for (var u=2; u<3; u++) {
+            if (-1<(row + u) && (row + u)<60) {
+                for (var v=-4; v<5; v++) {
+                    if (-1<(col + v) && (col + v)<60) {
+                        darkCells[row + u][col + v].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 9
+        for (var w=3; w<4; w++) {
+            if (-1<(row + w) && (row + w)<60) {
+                for (var x=-3; x<4; x++) {
+                    if (-1<(col + w)<60 && -1<(col + x)<60) {
+                        darkCells[row + w][col + x].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 10
+        for (var y=4; y<5; y++) {
+            if (-1<(row + y) && (row + y)<60) {
+                for (var z=-2; z<3; z++) {
+                    if (-1<(col + z) && (col + z)<60) {
+                        darkCells[row + y][col + z].isScope = true;
+                    }
+                }
+            }
+        }
+        //row 11
+        for (var a=5; a<6; a++) {
+            if (-1<(row + a) && (row + a)<60) {
+                for (var b=-1; b<2; b++) {
+                    if (-1<(col + b) && (col + b)<60) {
+                        darkCells[row + a][col + b].isScope = true;
+                    }
+                }
+            }
+        }
+        //sets all cells outside of scope to black
         for (var i=0; i<60; i++) {
             for (var j=0; j<60; j++) {
-                darkCells[i][j].isActive = !darkCells[i][j].isActive;
+                if (darkCells[i][j].isScope === false) {
+                    darkCells[i][j].isActive = !darkCells[i][j].isActive;
+                }
+                //else if (darkCells[i][j].isScope === true)
+                //darkCells[i][j].isActive =
             }
         }
         this.setState({ darkCells: darkCells });
@@ -224,7 +323,6 @@ var Board = React.createClass({
                        movePlayer={this.movePlayer}
                        obtainHealth={this.obtainHealth}
                        obtainWeapon={this.obtainWeapon}
-                       //clicked={this.state.clicked}
                        darkCells={this.state.darkCells}
             />
             <Legend />

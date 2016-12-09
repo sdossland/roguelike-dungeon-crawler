@@ -5,6 +5,7 @@ import React from 'react';
 import Cell from './Cell';
 import { bgColors } from './App';
 import Darkness from './Darkness';
+// import Scope from './Scope';
 
 var Gameboard = React.createClass({
     componentDidMount: function() {
@@ -66,11 +67,14 @@ var Gameboard = React.createClass({
             }
         }
         this.props.movePlayer(x, y);
+        //this.props.toggleCell??
     },
     render: function() {
         return (
             <div className="gameboard" >
                 <Darkness darkCells={this.props.darkCells} />
+                {/*<Scope darkCells={this.props.darkCells}*/}
+                       {/*playerCurrentPosition={this.props.playerCurrentPosition} />*/}
                 {this.props.cells.map(function(row) {
                     return row.map(function(cell) {
                         return (<Cell style={{backgroundColor: cell.color }} />);
