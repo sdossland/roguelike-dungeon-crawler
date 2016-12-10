@@ -4,9 +4,7 @@
 import React from 'react';
 
 var Stats = React.createClass({
-    // toggleDarkness: function() {
-    //     this.props.toggleCell();
-    //     },
+
     render: function() {
         return (
             <div className="container row">

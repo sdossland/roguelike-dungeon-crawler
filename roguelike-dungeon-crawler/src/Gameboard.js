@@ -19,6 +19,7 @@ var Gameboard = React.createClass({
         }
         this.props.updateCells(this.props.king[0], this.props.king[1], {color: bgColors['Purple']}); //king
         this.props.updateCells(this.props.weapon[0], this.props.weapon[1], {color: bgColors['Yellow']}); //weapon
+        this.props.scope();
     },
     handleDirections: function(e) {
         /*row, column*/
@@ -38,6 +39,7 @@ var Gameboard = React.createClass({
             } else if (this.props.cells[x][y].color === '#c00') { //red..enemy
                 //this.props.attackEnemy();
             }
+            //this.props.scope();
         } /*arrow => down*/
         else if (e.keyCode === 40) {
             x = currentPositionX + keyStrokes[0][0];
@@ -67,14 +69,11 @@ var Gameboard = React.createClass({
             }
         }
         this.props.movePlayer(x, y);
-        //this.props.toggleCell??
     },
     render: function() {
         return (
             <div className="gameboard" >
                 <Darkness darkCells={this.props.darkCells} />
-                {/*<Scope darkCells={this.props.darkCells}*/}
-                       {/*playerCurrentPosition={this.props.playerCurrentPosition} />*/}
                 {this.props.cells.map(function(row) {
                     return row.map(function(cell) {
                         return (<Cell style={{backgroundColor: cell.color }} />);

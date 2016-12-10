@@ -45,7 +45,6 @@ function calculateDarkCells(numRows, numColumns /*, isActive*/) {
     for (var i=0; i<numRows; i++) {
         var row = [];
         for (var j=0; j<numColumns; j++) {
-            //this.clicked = clicked;
             row.push({ isPlayer: false, isActive: false, isScope: false });
         }
         cellArr.push(row);
@@ -134,7 +133,7 @@ var Board = React.createClass({
           enemyCells: calculateEnemies(numRows, numColumns),
           king: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
           weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
-          // clicked: 'dark'
+          clicked: 'false'
       });
     },
     obtainHealth: function() {
@@ -164,37 +163,21 @@ var Board = React.createClass({
     //     });
     //  },
 
-    // componentWillMount: function() {
-    //     var rows = this.state.numRows,
-    //         columns = this.state.numColumns;
-    //     this.setState({
-    //         cells: this.calculateCells(rows, columns)
-    //         //player: this.playerStart(rows, columns)
-    //     });
-    // },
-
     updateCells: function(x, y, options) {
         var cells = this.state.cells.slice();
         cells[x][y] = Object.assign({}, cells[x][y], options);
         this.setState({ cells: cells });
     },
-
-    movePlayer: function(x, y) {
-        var prevX = this.state.playerCurrentPosition[0];
-        var prevY = this.state.playerCurrentPosition[1];
-        var cells = this.state.cells.slice();
-        cells[prevX][prevY] = Object.assign({}, cells[x][y], { color: bgColors['Grey'] }); // prev
-        cells[x][y] = Object.assign({}, cells[x][y], { color: bgColors['Blue'] }); // next
-        this.setState({
-            cells: cells,
-            playerCurrentPosition: [x, y]
-        });
-    },
-    toggleCell: function() {
-      var darkCells = this.state.darkCells,
-          row = this.state.playerCurrentPosition[0],
-          col = this.state.playerCurrentPosition[1];
-        console.log(row, col);
+    scope: function() {
+        var darkCells = this.state.darkCells,
+            row = this.state.playerCurrentPosition[0],
+            col = this.state.playerCurrentPosition[1];
+        //console.log(row, col);
+        for (var i=0; i<60; i++) {
+            for (var j=0; j<60; j++) {
+                darkCells[i][j].isScope = false;
+            }
+        }
         //row 1
         for (var k=-5; k<-4; k++) {
             if (-1<(row + k) && (row + k)<60) {
@@ -287,14 +270,52 @@ var Board = React.createClass({
                 }
             }
         }
-        //sets all cells outside of scope to black
+        this.setState({ darkCells: darkCells });
+    },
+    toggleCell: function() {
+        var darkCells = this.state.darkCells;
+        this.setState({ clicked: !this.state.clicked });
         for (var i=0; i<60; i++) {
             for (var j=0; j<60; j++) {
-                if (darkCells[i][j].isScope === false) {
-                    darkCells[i][j].isActive = !darkCells[i][j].isActive;
+                if (this.state.clicked === false) {
+                    darkCells[i][j].isActive = false;
+                } else if (this.state.clicked === true) {
+                    if (darkCells[i][j].isScope === false) {
+                        darkCells[i][j].isActive = true;
+                    } else if (darkCells[i][j].isScope === true) {
+                        darkCells[i][j].isActive = false;
+                    }
                 }
-                //else if (darkCells[i][j].isScope === true)
-                //darkCells[i][j].isActive =
+            }
+        }
+        this.setState({ darkCells: darkCells });
+        console.log(this.state.clicked); //can do a count as well w/ odd and even
+    },
+    movePlayer: function(x, y) {
+        var prevX = this.state.playerCurrentPosition[0];
+        var prevY = this.state.playerCurrentPosition[1];
+        var cells = this.state.cells.slice();
+        cells[prevX][prevY] = Object.assign({}, cells[x][y], { color: bgColors['Grey'] }); // prev
+        cells[x][y] = Object.assign({}, cells[x][y], { color: bgColors['Blue'] }); // next
+        this.setState({
+            cells: cells,
+            playerCurrentPosition: [x, y]
+        });
+        //renders the new scope cells
+        this.scope();
+        //sets the color to black or transparent
+        var darkCells = this.state.darkCells;
+        for (var i=0; i<60; i++) {
+            for (var j=0; j<60; j++) {
+                if (this.state.clicked === true) {
+                    darkCells[i][j].isActive = false;
+                } else if (this.state.clicked === false) {
+                    if (darkCells[i][j].isScope === false) {
+                        darkCells[i][j].isActive = true;
+                    } else if (darkCells[i][j].isScope === true) {
+                        darkCells[i][j].isActive = false;
+                    }
+                }
             }
         }
         this.setState({ darkCells: darkCells });
@@ -324,6 +345,7 @@ var Board = React.createClass({
                        obtainHealth={this.obtainHealth}
                        obtainWeapon={this.obtainWeapon}
                        darkCells={this.state.darkCells}
+                       scope={this.scope}
             />
             <Legend />
         </div>
