@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import Stats from './Stats';
 import Gameboard from './Gameboard';
 import Legend from './Legend';
@@ -76,53 +77,45 @@ function calculateHealthAgents(x, y) {
     return healthAgents;
 }
 
-// var player = {
-//     health: 20,
-//     attack: 12,
-//     nextLevel: 60
-// }
-
-// var enemy = {
-//     health: 20,
-//     attack: 12,
-//     nextLevel: 10
-// }
-
 var weapon = [
     {
         name: 'stick',
-        attack: 5
+        damage: 10
     },
     {
         name: 'brass knuckles',
-        attack: 7
+        damage: 7
     },
     {
         name: 'serrated daggers',
-        attack: 12
+        damage: 12
     },
     {
         name: 'katana',
-        attack: 16
+        damage: 16
     },
     {
         name: 'reaper\'s scythe',
-        attack: 22
+        damage: 22
     },
     {
         name: 'large trout',
-        attack: 30
+        damage: 30
     }
 ];
 
+var subtractLevelXP = [10, 20, 30, 40, 50];
+var nextLevelXP = [60, 120, 180, 240, 300];
+
+var numRows = 60,
+    numColumns = 60;
+
 var Board = React.createClass({
     getInitialState: function () {
-        var numRows = 60,
-            numColumns = 60;
       return ({
           healthStats: 100,
-          weaponStats: 'stick',
-          attack: 7,
+          weaponStats: weapon[0].name,
+          attack: weapon[0].damage,
           level: 0,
           nextLevel: 60,
           dungeon: 0,
@@ -143,30 +136,25 @@ var Board = React.createClass({
             });
     },
     obtainWeapon: function() {
-        var weaponPickedUp = weapon[Math.round(Math.random() * weapon.length)].name;
-      this.setState({
-         weaponStats: weaponPickedUp
-      });
+        var counter = _.findIndex(weapon, ['name', this.state.weaponStats]) + 1;
+        this.setState({
+          weaponStats: weapon[counter].name,
+          attack: weapon[counter].damage
+        });
     },
-    // attackEnemy: function(x, y) {
-    //     var healthReduced = this.state.healthStats - 12;
-    //     var enemyReduction;
-    //     for (var i=0; i<weapon.length; i++) {
-    //         if (weapon[i].name === this.state.weaponStats) {
-    //             enemyReduction = weapon[i].attack;
-    //         }
-    //     }
-    //     var finalEnemyReduction =  cells[x][y].health - enemyReduction;
-    //     this.setState({
-    //        healthStats: healthReduced
-    //         cells[x][y].health: finalEnemyReduction //need help here! how to access each enemy's health individually
-    //     });
-    //  },
 
     updateCells: function(x, y, options) {
         var cells = this.state.cells.slice();
         cells[x][y] = Object.assign({}, cells[x][y], options);
         this.setState({ cells: cells });
+    },
+    calculateBoss: function (x, y) {
+        var bossStart = [Math.round(Math.random() * x), Math.round(Math.random() * y)];
+        var neighborCells = [[0,0], [1, 0], [0, 1], [1, 1]],
+            bossCells = [];
+        for (var l=0; l<neighborCells.length; l++) {
+            bossCells.push([bossStart[0] + neighborCells[l][0], bossStart[1] + neighborCells[l][1]]);
+        }
     },
     scope: function() {
         var darkCells = this.state.darkCells,
@@ -320,6 +308,113 @@ var Board = React.createClass({
         }
         this.setState({ darkCells: darkCells });
     },
+    resetGame: function() {
+        alert("Gameover! Better luck next time!"); //create a popup window
+        this.setState({
+            healthStats: 100,
+            weaponStats: weapon[0].name,
+            attack: weapon[0].damage,
+            level: 0,
+            nextLevel: 60,
+            dungeon: 0,
+            cells: calculateCells(numRows,numColumns),
+            darkCells: calculateDarkCells(numRows, numColumns),
+            playerCurrentPosition: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+            healthCells: calculateHealthAgents(numRows, numColumns),
+            enemyCells: calculateEnemies(numRows, numColumns),
+            king: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+            weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+            clicked: 'false'
+        });
+        this.initialCellCreation();
+    },
+    initialCellCreation: function() {
+        document.addEventListener("keydown", this.handleDirections);
+        this.updateCells(this.state.playerCurrentPosition[0],this.state.playerCurrentPosition[1], {color: bgColors['Blue']});
+        for (var j=0; j<4; j++) {
+            this.updateCells(this.state.healthCells[j][0], this.state.healthCells[j][1], {color: bgColors['Green']});
+        }
+        for (var i=0; i<5; i++) {
+            this.updateCells(this.state.enemyCells[i][0], this.state.enemyCells[i][1], {color: bgColors['Red'], enemyHealth: 20});
+        }
+        this.updateCells(this.state.king[0], this.state.king[1], {color: bgColors['Purple'], kingHealth: 40}); //king
+        for (var h=0; h<4; h++) {
+            this.updateCells(this.state.boss[i][0], this.state.boss[i][1], {color: bgColors['Red'], bossHealth: 100});
+        }
+        this.updateCells(this.state.weapon[0], this.state.weapon[1], {color: bgColors['Yellow']}); //weapon
+        this.scope();
+    },
+    attackEnemy: function(x, y) {
+        var healthReduced = this.state.healthStats - 6;
+        var enemyHealthReduction = this.state.cells[x][y].enemyHealth - this.state.attack;
+        if (healthReduced > 0) {
+            if (this.state.cells[x][y].enemyHealth > 0) {
+                this.setState({ healthStats: healthReduced });
+                this.updateCells(x, y, {enemyHealth: enemyHealthReduction});
+            } else if (this.state.cells[x][y].enemyHealth < 1) {
+                for (var k = 0; k < this.state.enemyCells.length; k++) { //is the removal necessary through...
+                    if (this.state.enemyCells[k][0] === x && this.state.enemyCells[k][1] === y) {
+                        var enemyCells = this.state.enemyCells.slice();
+                        enemyCells.splice(k, 1);
+                        this.setState({ enemyCells: enemyCells });
+                    }
+                } //necessary through here??
+                this.movePlayer(x, y);
+                var nextLevel = this.state.nextLevel - subtractLevelXP[this.state.level];
+                if (nextLevel > 0) {
+                    this.setState({ nextLevel: nextLevel });
+                } else if (nextLevel < 0) {
+                    var level = this.state.level + 1;
+                    this.setState({
+                        level: level,
+                        nextLevel: nextLevelXP[level]
+                    });
+                }
+            }
+        } else {
+            this.resetGame();
+        }
+    },
+    attackKing: function (x, y) {
+        var healthReduced = this.state.healthStats - 12;
+        var kingHealthReduction = this.state.cells[x][y].kingHealth - this.state.attack;
+        if (healthReduced > 0) {
+            if (this.state.cells[x][y].kingHealth > 0) {
+                this.setState({ healthStats: healthReduced });
+                this.updateCells(x, y, {kingHealth: kingHealthReduction});
+            } else if (this.state.cells[x][y].kingHealth < 1) {
+                this.movePlayer(x, y);
+                if (this.state.dungeon < 3) {
+                    var dungeon = this.state.dungeon + 1;
+                    this.setState({
+                        dungeon: dungeon,
+                        playerCurrentPosition: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+                        healthCells: calculateHealthAgents(numRows, numColumns),
+                        enemyCells: calculateEnemies(numRows, numColumns),
+                        king: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+                        weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]
+                    });
+                    this.initialCellCreation();
+                } else if (this.state.dungeon === 3) {
+                    dungeon = this.state.dungeon + 1;
+                    this.setState({
+                        dungeon: dungeon,
+                        playerCurrentPosition: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+                        healthCells: calculateHealthAgents(numRows, numColumns),
+                        enemyCells: calculateEnemies(numRows, numColumns),
+                        //king: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+                        weapon: [Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)],
+                        boss: this.calculateBoss(numRows, numColumns)
+                    });
+                    this.initialCellCreation();
+                } else if (this.state.dungeon === 4) {
+                    alert("Congratulations! You won!"); //create nicer popup here perhaps asking if they want to restart the game??
+                }
+            }
+        } else {
+            this.resetGame();
+        }
+    },
   render: function() {
     return (
         <div>
@@ -346,6 +441,9 @@ var Board = React.createClass({
                        obtainWeapon={this.obtainWeapon}
                        darkCells={this.state.darkCells}
                        scope={this.scope}
+                       attackEnemy={this.attackEnemy}
+                       attackKing={this.attackKing}
+                       initialCellCreation={this.initialCellCreation}
             />
             <Legend />
         </div>
