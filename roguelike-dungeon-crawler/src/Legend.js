@@ -7,7 +7,6 @@ import {bgColors} from './App';
 import {cellDisplay} from  './App';
 
 var Legend = React.createClass({
-
     render: function () {
         return (
             <div className="container row">

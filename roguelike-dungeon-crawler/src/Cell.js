@@ -6,9 +6,7 @@ import React from 'react';
 var Cell = React.createClass({
    render: function () {
        return (
-           <div className="cell" style={this.props.style} /*onKeyDown={this.props.arrowKeyHandler}*/>
-
-           </div>
+           <div className="cell" style={this.props.style} ></div>
        )
    }
 });
