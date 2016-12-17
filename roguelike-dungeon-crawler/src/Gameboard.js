@@ -20,10 +20,11 @@ var Gameboard = React.createClass({
         this.props.obtainWeapon();
         this.props.movePlayer(x, y);
     } else if (this.props.cells[x][y].color === '#c00') { //red..enemy
-        //must distinguish between enemy and boss. perhaps make boss darker red #800000
         this.props.attackEnemy(x, y);
     } else if (this.props.cells[x][y].color === '#4d0099') { //purple..king
         this.props.attackKing(x, y);
+    } else if (this.props.cells[x][y].color === '#800000') { //dark red..boss
+        this.props.attackBoss();
     } else if (this.props.cells[x][y].color === '#999') { //grey..board
         this.props.movePlayer(x, y);
     }

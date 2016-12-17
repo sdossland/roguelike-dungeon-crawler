@@ -81,3 +81,30 @@ body {
     display: inline-block;
     float: none;
 }
+/*---pop up window---*/
+.notify-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+    align-content: flex-start;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.notify-item {
+    width: 250px;
+    margin: 5px 10px;
+    color: #FFF;
+    border-radius: 5px;
+    background-color: rgba(81, 163, 81, 0.4);
+}
+.notify-item > p {
+    font-family: 'Lora', serif;
+    margin: 10px;
+    opacity: .8;
+}
+.notify-title {
+    font-weight: 700;
+}

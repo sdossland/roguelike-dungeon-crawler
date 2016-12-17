@@ -4,6 +4,7 @@ import Stats from './Stats';
 import Gameboard from './Gameboard';
 import Legend from './Legend';
 import './App.css';
+import Popup from './Popup';
 
 /*RULES:
 * -1 player per dungeon
@@ -81,7 +82,7 @@ var weapon = [
         damage: 22
     },
     {
-        name: 'large trout',
+        name: 'large trout', //remove?? never gets here?
         damage: 30
     }
 ];
@@ -95,7 +96,7 @@ var numRows = 60,
 var reducedNumRows = numRows - 2,
     reducedNumColumns = numColumns - 2;
 
-//could calculate nested array of random numbers here to ensure no dupes
+//creates nested array of random numbers to ensure no dupes w/ health, enemies, king, weapon
 function createAgentCells(x, y) {
     var agentCells = [[Math.floor(Math.random() * (x - 2)) + 2, Math.floor(Math.random() * (y - 2)) + 2]],
         a = 0;
@@ -159,13 +160,13 @@ var Board = React.createClass({
           king: agentCells.slice(10, 11),
           weapon: agentCells.slice(11,12),
           //boss: [],
-          boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]),
+          boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]), //make it 10,11 in dungeon 4
+          bossHealth: 40,
           clicked: 'false'
       });
     },
     obtainHealth: function() {
-          var finalPlayerHealth = this.state.healthStats + 20;
-          this.setState({ healthStats: finalPlayerHealth });
+          this.setState({ healthStats: this.state.healthStats + 20 });
     },
     obtainWeapon: function() {
         var counter = _.findIndex(weapon, ['name', this.state.weaponStats]) + 1;
@@ -181,102 +182,99 @@ var Board = React.createClass({
     },
     scope: function() {
         var darkCells = this.state.darkCells,
-            row = this.state.playerCurrentPosition[0][0],
-            col = this.state.playerCurrentPosition[0][1];
-        //console.log(row, col);
+            playerRow = this.state.playerCurrentPosition[0][0],
+            playerCol = this.state.playerCurrentPosition[0][1];
         for (var i=0; i<60; i++) {
             for (var j=0; j<60; j++) {
                 darkCells[i][j].isScope = false;
             }
         }
         //row 1
-        for (var k=-5; k<-4; k++) {
-            if (-1<(row + k) && (row + k)<60) {
-                for (var l=-1; l<2; l++) {
-                    if (-1<(col + l) && (col + l)<60) {
-                        darkCells[row + k][col + l].isScope = true;
+        for (var scopeRow1=-5; scopeRow1<-4; scopeRow1++) {
+            if (-1<(playerRow + scopeRow1) && (playerRow + scopeRow1)<60) {
+                for (var scopeWidth1=-1; scopeWidth1<2; scopeWidth1++) {
+                    if (-1<(playerCol + scopeWidth1) && (playerCol + scopeWidth1)<60) {
+                        darkCells[playerRow + scopeRow1][playerCol + scopeWidth1].isScope = true;
                     }
                 }
             }
         }
         //row 2
-        for (var m=-4; m<-3; m++) {
-            if (-1<(row + m) && (row + m)<60) {
-                for (var n=-2; n<3; n++) {
-                    if (-1<(col + n) && (col + n)<60) {
-                        darkCells[row + m][col + n].isScope = true;
+        for (var scopeRow2=-4; scopeRow2<-3; scopeRow2++) {
+            if (-1<(playerRow + scopeRow2) && (playerRow + scopeRow2)<60) {
+                for (var scopeWidth2=-2; scopeWidth2<3; scopeWidth2++) {
+                    if (-1<(playerCol + scopeWidth2) && (playerCol + scopeWidth2)<60) {
+                        darkCells[playerRow + scopeRow2][playerCol + scopeWidth2].isScope = true;
                     }
                 }
             }
         }
         //row 3
-        for (var o=-3; o<-2; o++) {
-            if (-1<(row + o) && (row + o)<60) {
-                for (var p=-3; p<4; p++) {
-                    if (-1<(col + p) && (col + p)<60) {
-                        darkCells[row + o][col + p].isScope = true;
+        for (var scopeRow3=-3; scopeRow3<-2; scopeRow3++) {
+            if (-1<(playerRow + scopeRow3) && (playerRow + scopeRow3)<60) {
+                for (var scopeWidth3=-3; scopeWidth3<4; scopeWidth3++) {
+                    if (-1<(playerCol + scopeWidth3) && (playerCol + scopeWidth3)<60) {
+                        darkCells[playerRow + scopeRow3][playerCol + scopeWidth3].isScope = true;
                     }
                 }
             }
         }
         //row 4
-        for (var q=-2; q<-1; q++) {
-            if (-1<(row + q) && (row + q)<60) {
-                for (var r=-4; r<5; r++) {
-                    if (-1<(col + r) && (col + r)<60) {
-                        darkCells[row + q][col + r].isScope = true;
+        for (var scopeRow4=-2; scopeRow4<-1; scopeRow4++) {
+            if (-1<(playerRow + scopeRow4) && (playerRow + scopeRow4)<60) {
+                for (var scopeWidth4=-4; scopeWidth4<5; scopeWidth4++) {
+                    if (-1<(playerCol + scopeWidth4) && (playerCol + scopeWidth4)<60) {
+                        darkCells[playerRow + scopeRow4][playerCol + scopeWidth4].isScope = true;
                     }
                 }
             }
         }
         //rows 5-7
-        for (var s=-1; s<2; s++) {
-            var newRow = row + s;
-            if (-1<newRow && newRow<60) {
-                for (var t=-5; t<6; t++) {
-                    var newCol = col + t;
-                    if ( -1<newCol && newCol<60 )  {
-                        darkCells[row + s][col + t].isScope = true;
+        for (var scopeRow5thru7=-1; scopeRow5thru7<2; scopeRow5thru7++) {
+            if (-1<(playerRow + scopeRow5thru7) && (playerRow + scopeRow5thru7)<60) {
+                for (var scopeWidth5thru7=-5; scopeWidth5thru7<6; scopeWidth5thru7++) {
+                    if ( -1<(playerCol + scopeWidth5thru7) && (playerCol + scopeWidth5thru7)<60 )  {
+                        darkCells[playerRow + scopeRow5thru7][playerCol + scopeWidth5thru7].isScope = true;
                     }
                 }
             }
         }
         //row 8
-        for (var u=2; u<3; u++) {
-            if (-1<(row + u) && (row + u)<60) {
-                for (var v=-4; v<5; v++) {
-                    if (-1<(col + v) && (col + v)<60) {
-                        darkCells[row + u][col + v].isScope = true;
+        for (var scopeRow8=2; scopeRow8<3; scopeRow8++) {
+            if (-1<(playerRow + scopeRow8) && (playerRow + scopeRow8)<60) {
+                for (var scopeWidth8=-4; scopeWidth8<5; scopeWidth8++) {
+                    if (-1<(playerCol + scopeWidth8) && (playerCol + scopeWidth8)<60) {
+                        darkCells[playerRow + scopeRow8][playerCol + scopeWidth8].isScope = true;
                     }
                 }
             }
         }
         //row 9
-        for (var w=3; w<4; w++) {
-            if (-1<(row + w) && (row + w)<60) {
-                for (var x=-3; x<4; x++) {
-                    if (-1<(col + x) && (col + x)<60) {
-                        darkCells[row + w][col + x].isScope = true;
+        for (var scopeRow9=3; scopeRow9<4; scopeRow9++) {
+            if (-1<(playerRow + scopeRow9) && (playerRow + scopeRow9)<60) {
+                for (var scopeWidth9=-3; scopeWidth9<4; scopeWidth9++) {
+                    if (-1<(playerCol + scopeWidth9) && (playerCol + scopeWidth9)<60) {
+                        darkCells[playerRow + scopeRow9][playerCol + scopeWidth9].isScope = true;
                     }
                 }
             }
         }
         //row 10
-        for (var y=4; y<5; y++) {
-            if (-1<(row + y) && (row + y)<60) {
-                for (var z=-2; z<3; z++) {
-                    if (-1<(col + z) && (col + z)<60) {
-                        darkCells[row + y][col + z].isScope = true;
+        for (var scopeRow10=4; scopeRow10<5; scopeRow10++) {
+            if (-1<(playerRow + scopeRow10) && (playerRow + scopeRow10)<60) {
+                for (var scopeWidth10=-2; scopeWidth10<3; scopeWidth10++) {
+                    if (-1<(playerCol + scopeWidth10) && (playerCol + scopeWidth10)<60) {
+                        darkCells[playerRow + scopeRow10][playerCol + scopeWidth10].isScope = true;
                     }
                 }
             }
         }
         //row 11
-        for (var a=5; a<6; a++) {
-            if (-1<(row + a) && (row + a)<60) {
-                for (var b=-1; b<2; b++) {
-                    if (-1<(col + b) && (col + b)<60) {
-                        darkCells[row + a][col + b].isScope = true;
+        for (var scopeRow11=5; scopeRow11<6; scopeRow11++) {
+            if (-1<(playerRow + scopeRow11) && (playerRow + scopeRow11)<60) {
+                for (var scopeWidth11=-1; scopeWidth11<2; scopeWidth11++) {
+                    if (-1<(playerCol + scopeWidth11) && (playerCol + scopeWidth11)<60) {
+                        darkCells[playerRow + scopeRow11][playerCol + scopeWidth11].isScope = true;
                     }
                 }
             }
@@ -285,7 +283,7 @@ var Board = React.createClass({
     },
     toggleCell: function() {
         var darkCells = this.state.darkCells;
-        this.setState({ clicked: !this.state.clicked });
+        this.setState({ clicked: !this.state.clicked }); //only different line
         for (var i=0; i<60; i++) {
             for (var j=0; j<60; j++) {
                 if (this.state.clicked === false) {
@@ -332,7 +330,8 @@ var Board = React.createClass({
         this.setState({ darkCells: darkCells });
     },
     resetGame: function() {
-        alert("Gameover! Better luck next time!"); //create a popup window
+        //alert("Gameover! Better luck next time!"); //create a popup window
+        this.props.showNotification(); //FIX!!!!
         var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
         this.setState({
             healthStats: 100,
@@ -350,13 +349,13 @@ var Board = React.createClass({
             weapon: agentCells.slice(11,12),
             //boss: [],
             boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]),
+            bossHealth: 40,
             clicked: 'false'
         });
         this.initialCellCreation();
     },
     initialCellCreation: function() {
         document.addEventListener("keydown", this.handleDirections);
-        //console.log("initialEnemy: " + this.state.enemyCells);
         this.updateCells(this.state.playerCurrentPosition[0][0],this.state.playerCurrentPosition[0][1], {color: bgColors['Blue']});
         for (var j=0; j<4; j++) {
             this.updateCells(this.state.healthCells[j][0], this.state.healthCells[j][1], {color: bgColors['Green']});
@@ -367,7 +366,7 @@ var Board = React.createClass({
         this.updateCells(this.state.king[0][0], this.state.king[0][1], {color: bgColors['Purple'], kingHealth: 40}); //king
         //if (this.state.boss) {
         for (var h=0; h<4; h++) {
-            this.updateCells(this.state.boss[h][0], this.state.boss[h][1], {color: bgColors['Red'], bossHealth: 100});
+            this.updateCells(this.state.boss[h][0], this.state.boss[h][1], {color: bgColors['DarkRed'], bossHealth: 100});
         }
         //}
         this.updateCells(this.state.weapon[0][0], this.state.weapon[0][1], {color: bgColors['Yellow']}); //weapon
@@ -389,7 +388,6 @@ var Board = React.createClass({
                 //     }
                 // } //necessary through here??
                 this.movePlayer(x, y);
-                //console.log("newEnemyArr: " + this.state.enemyCells);
                 var nextLevel = this.state.nextLevel - subtractLevelXP[this.state.level];
                 if (nextLevel > 0) {
                     this.setState({ nextLevel: nextLevel });
@@ -433,9 +431,9 @@ var Board = React.createClass({
                         playerCurrentPosition: agentCells.slice(0, 1)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
                         healthCells: agentCells.slice(1, 5)/*calculateHealthAgents(numRows, numColumns)*/,
                         enemyCells: agentCells.slice(5, 10)/*calculateEnemies(numRows, numColumns)*/,
-                        //king: agentCells.slice(10, 11) /*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
                         weapon: agentCells.slice(11, 12)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
-                        //boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]) /*this.calculateBoss(numRows, numColumns)*/
+                        //boss: calculateBoss(agentCells.slice(10, 11)[0][0], agentCells.slice(10, 11)[0][1]) /*this.calculateBoss(numRows, numColumns)*/
+                        //bossHealth: 40
                     });
                     this.initialCellCreation();
                 } else if (this.state.dungeon === 4) {
@@ -443,11 +441,30 @@ var Board = React.createClass({
                 }
             }
         } else {
+            alert('Gameover! Better luck next time!');
             this.resetGame();
         }
     },
     attackBoss: function() {
-
+        var healthReduced = this.state.healthStats - 10;
+        var bossHealthReduction = this.state.bossHealth - this.state.attack;
+        if (this.state.healthStats > 0) {
+            if (this.state.bossHealth > 0) {
+                this.setState({
+                    healthStats: healthReduced,
+                    bossHealth: bossHealthReduction
+                });
+                console.log(this.state.bossHealth);
+                console.log("playerhealth: " + this.state.healthStats);
+            } else if (this.state.bossHealth < 1) {
+                alert('Congratulations!!! You defeated the boss in dungeon 4.');
+                this.resetGame();
+                //popup here that reads you are a winner! on OK, this.resetGame();
+            }
+        } else {
+            //alert('Gameover! Better luck next time!');
+            this.resetGame();
+        }
     },
   render: function() {
     return (
@@ -480,6 +497,7 @@ var Board = React.createClass({
                        attackBoss={this.attackBoss}
                        initialCellCreation={this.initialCellCreation}
             />
+            <Popup />
             <Legend />
         </div>
     );
