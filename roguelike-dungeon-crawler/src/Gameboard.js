@@ -12,23 +12,31 @@ var Gameboard = React.createClass({
         this.props.initialCellCreation();
         document.addEventListener("keydown", this.handleDirections);
     },
-    verifyNeighborCell: function (x, y) {
+    nextCell: function (x, y) {
+        var newState = {};
     if (x<0 || x>59 || y<0 || y>59) {
     } else if(this.props.cells[x][y].color === '#080') { //green..health
-        this.props.obtainHealth();
-        this.props.movePlayer(x, y);
+        newState.healthStats = this.props.obtainHealth();
+        //this.props.movePlayer(x, y);
     } else if (this.props.cells[x][y].color === '#fc0') { //yellow..weapon
-        this.props.obtainWeapon();
-        this.props.movePlayer(x, y);
+        newState.weaponStats = this.props.obtainWeapon().name;
+        newState.attack = this.props.obtainWeapon().damage;
+        //this.props.movePlayer(x, y);
     } else if (this.props.cells[x][y].color === '#c00') { //red..enemy
-        this.props.attackEnemy(x, y);
+        this.props.attackEnemy(x, y); //should return players next location
     } else if (this.props.cells[x][y].color === '#4d0099') { //purple..king
         this.props.attackKing(x, y);
     } else if (this.props.cells[x][y].color === '#800000') { //dark red..boss
         this.props.attackBoss(x, y);
-    } else if (this.props.cells[x][y].color === '#999') { //grey..board
+    } /*else if (this.props.cells[x][y].color === '#999') { //grey..board
         this.props.movePlayer(x, y);
-    }
+    }*/
+        this.props.movePlayer(x, y);
+        // newState.cells = this.props.movePlayer(x, y).cells;
+        // newState.playerCurrentPosition = this.props.movePlayer(x, y).playerCurrentPosition;
+         console.log(newState);
+    this.props.updater(newState)/*.bind(this)*/;
+           //this.props.movePlayer(x, y);
     },
     handleDirections: function(e) {
         /*row, column*/
@@ -39,21 +47,23 @@ var Gameboard = React.createClass({
         if (e.keyCode === 38) { //up
             x = currentPositionX + keyStrokes[1][0];
             y = currentPositionY + keyStrokes[1][1];
-            this.verifyNeighborCell(x, y);
+            this.nextCell(x, y);
+            //this.props.movePlayer(x, y);
         } else if (e.keyCode === 40) { //down
             x = currentPositionX + keyStrokes[0][0];
             y = currentPositionY + keyStrokes[0][1];
-            this.verifyNeighborCell(x, y);
+            this.nextCell(x, y);
         } else if (e.keyCode === 39) { //right
             x = currentPositionX + keyStrokes[2][0];
             y = currentPositionY + keyStrokes[2][1];
-            this.verifyNeighborCell(x, y);
+            this.nextCell(x, y);
         } else if (e.keyCode === 37) { //left
             x = currentPositionX + keyStrokes[3][0];
             y = currentPositionY + keyStrokes[3][1];
-            this.verifyNeighborCell(x, y);
+            this.nextCell(x, y);
         }
-        // this.props.movePlayer(x, y);
+        //this.props.movePlayer(x, y);
+        //stateSetter function
     },
     render: function() {
         return (

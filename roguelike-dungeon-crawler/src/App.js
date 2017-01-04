@@ -141,12 +141,10 @@ function calculateBoss (x, y) {
     return bossCells;
 }
 
-//var agentCells;
-
 var Board = React.createClass({
     getInitialState: function () {
         var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
-      return ({
+        return ({
           healthStats: 100,
           weaponStats: weapon[0].name,
           attack: weapon[0].damage,
@@ -160,28 +158,26 @@ var Board = React.createClass({
           enemyCells: agentCells.slice(5, 10),
           king: agentCells.slice(10, 11),
           weapon: agentCells.slice(11,12),
-          //boss: [],
-          //boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]), //make it 10,11 in dungeon 4
-          //bossHealth: 40,
           clicked: 'false',
           popUp: false,
           message: ''
       });
     },
     obtainHealth: function() {
-          this.setState({ healthStats: this.state.healthStats + 20 });
+        var healthStats = this.state.healthStats + 20;
+        return healthStats;
     },
     obtainWeapon: function() {
         var counter = _.findIndex(weapon, ['name', this.state.weaponStats]) + 1;
-        this.setState({
-          weaponStats: weapon[counter].name,
-          attack: weapon[counter].damage
-        });
+          return {
+              name: weapon[counter].name,
+              damage: weapon[counter].damage
+          };
     },
     updateCells: function(x, y, options) {
         var cells = this.state.cells.slice();
         cells[x][y] = Object.assign({}, cells[x][y], options);
-        this.setState({ cells: cells });
+        return cells;
     },
     scope: function() {
         var darkCells = this.state.darkCells,
@@ -286,7 +282,7 @@ var Board = React.createClass({
     },
     toggleCell: function() {
         var darkCells = this.state.darkCells;
-        this.setState({ clicked: !this.state.clicked }); //only different line
+        this.setState({ clicked: !this.state.clicked });
         for (var i=0; i<60; i++) {
             for (var j=0; j<60; j++) {
                 if (this.state.clicked === false) {
@@ -301,7 +297,6 @@ var Board = React.createClass({
             }
         }
         this.setState({ darkCells: darkCells });
-        //console.log(this.state.clicked); //can do a count as well w/ odd and even
     },
     movePlayer: function(x, y) {
         var prevX = this.state.playerCurrentPosition[0][0];
@@ -314,67 +309,29 @@ var Board = React.createClass({
             playerCurrentPosition: [[x, y]]
         });
         //renders the new scope cells
-        this.scope();
+        //this.scope();
         //sets the color to black or transparent
-        var darkCells = this.state.darkCells;
-        for (var i=0; i<60; i++) {
-            for (var j=0; j<60; j++) {
-                if (this.state.clicked === true) {
-                    darkCells[i][j].isActive = false;
-                } else if (this.state.clicked === false) {
-                    if (darkCells[i][j].isScope === false) {
-                        darkCells[i][j].isActive = true;
-                    } else if (darkCells[i][j].isScope === true) {
-                        darkCells[i][j].isActive = false;
-                    }
-                }
-            }
-        }
-        this.setState({ darkCells: darkCells });
+        // var darkCells = this.state.darkCells;
+        // for (var i=0; i<60; i++) {
+        //     for (var j=0; j<60; j++) {
+        //         if (this.state.clicked === true) {
+        //             darkCells[i][j].isActive = false;
+        //         } else if (this.state.clicked === false) {
+        //             if (darkCells[i][j].isScope === false) {
+        //                 darkCells[i][j].isActive = true;
+        //             } else if (darkCells[i][j].isScope === true) {
+        //                 darkCells[i][j].isActive = false;
+        //             }
+        //         }
+        //     }
+        // }
+        // this.setState({ darkCells: darkCells });
+        //return { this.state.darkCells = darkCells };
     },
-    // resetAgentCells: function () {
-    //   this.setState({
-    //       playerCurrentPosition: [],
-    //       healthCells: [],
-    //       enemyCells: [],
-    //       king: [],
-    //       weapon: [],
-    //   }, function() {
-    //       this.setState({
-    //
-    //       })
-    //   });
-    // },
     resetGame: function() {
-        //this.resetAgentCells();
-        // this.setState({
-        //         playerCurrentPosition: [],
-        //         healthCells: [],
-        //         enemyCells: [],
-        //         king: [],
-        //         weapon: [],
-        //     }, function() {
-            var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
-            this.setState({
-                healthStats: 100,
-                weaponStats: weapon[0].name,
-                attack: weapon[0].damage,
-                level: 0,
-                nextLevel: 60,
-                dungeon: 0,
-                cells: calculateCells(numRows, numColumns),
-                darkCells: calculateDarkCells(numRows, numColumns),
-                playerCurrentPosition: agentCells.slice(0, 1),
-                healthCells: agentCells.slice(1, 5),
-                enemyCells: agentCells.slice(5, 10),
-                king: agentCells.slice(10, 11),
-                weapon: agentCells.slice(11, 12),
-                //boss: [],
-                //boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]),
-                //bossHealth: 40,
-                clicked: 'false'
-            });
-        // });
+            this.setState(
+                this.getInitialState()
+            );
         this.initialCellCreation();
     },
     initialCellCreation: function() {
@@ -434,22 +391,18 @@ var Board = React.createClass({
         var kingHealthReduction = this.state.cells[x][y].kingHealth - this.state.attack;
         if (healthReduced > 0) {
             if (this.state.cells[x][y].kingHealth > 0) {
-                this.setState({ healthStats: healthReduced });
-                this.updateCells(x, y, {kingHealth: kingHealthReduction});
+                this.setState({
+                     healthStats: healthReduced,
+                     cells: this.updateCells(x, y, {kingHealth: kingHealthReduction})
+                });
+                //return player's position
             } else if (this.state.cells[x][y].kingHealth < 1) {
-                this.movePlayer(x, y);
-
-                // this.setState({
-                //     playerCurrentPosition: [],
-                //     healthCells: [],
-                //     enemyCells: [],
-                //     king: [],
-                //     weapon: [],
-                // }, function() {
-
-                var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
+                var agentCells = createAgentCells(reducedNumRows, reducedNumColumns),
+                    dungeon = this.state.dungeon + 1;
+                //return dungeon
+                //then in Gameboard.js, set the below states
+                //then run initial cell creation
                 if (this.state.dungeon < 3) {
-                    var dungeon = this.state.dungeon + 1;
                     this.setState({
                         dungeon: dungeon,
                         playerCurrentPosition: agentCells.slice(0, 1),
@@ -459,8 +412,8 @@ var Board = React.createClass({
                         weapon: agentCells.slice(11, 12)
                     });
                     this.initialCellCreation();
+                    //return x,y; //returns players position to be used to move the player
                 } else if (this.state.dungeon === 3) {
-                    dungeon = this.state.dungeon + 1;
                     this.setState({
                         dungeon: dungeon,
                         playerCurrentPosition: agentCells.slice(0, 1),
@@ -468,14 +421,9 @@ var Board = React.createClass({
                         enemyCells: agentCells.slice(5, 10),
                         weapon: agentCells.slice(11, 12),
                         boss: calculateBoss(agentCells.slice(10, 11)[0][0], agentCells.slice(10, 11)[0][1]),
-                        //bossHealth: 40
                     });
                     this.initialCellCreation();
-                    // } else if (this.state.dungeon === 4) {
-                    //     alert("Congratulations! You won!"); //create nicer popup here perhaps asking if they want to restart the game??
-                    // }
                 }
-            // })
              }
         } else {
             this.setState({
@@ -489,25 +437,24 @@ var Board = React.createClass({
         var bossHealthReduction = this.state.bossHealth - this.state.attack;
         if (this.state.healthStats > 0) {
             if (this.state.bossHealth > 0) {
-                this.setState({
+                return ({
                     healthStats: healthReduced,
                     bossHealth: bossHealthReduction
                 });
-                //console.log(this.state.bossHealth);
-                //console.log("playerhealth: " + this.state.healthStats);
             } else if (this.state.bossHealth < 1) {
-                this.setState({
+                return ({
                     message: "Congratulations!!! You defeated the boss in dungeon 4.",
                     popUp: true
                 });
             }
         } else {
-            this.setState({
+            return ({
                 message: "Gameover! Better luck next time!",
                 popUp: true
             });
         }
     },
+
   render: function() {
       return (
         <div>
@@ -541,6 +488,7 @@ var Board = React.createClass({
                        popUp={this.state.popUp}
                        message={this.state.message}
                        resetGame={this.resetGame}
+                       updater={this.setState}
             />
             <Legend />
         </div>
