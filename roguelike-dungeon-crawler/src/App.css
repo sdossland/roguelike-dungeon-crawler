@@ -32,22 +32,12 @@ body {
     transform: translate(-50%,0);
     margin-top: 15px;
     margin-bottom: 15px;
-    /*position: relative;*/
-    /*background-color: pink;*/
     z-index: -1;
-    /*position: relative;*/
 }
 .gameboard::-webkit-scrollbar {
     display: none;
 }
 .darkness {
-    /*overflow: auto;*/
-    /*height: 480px;*/
-    /*width: 600px;*/
-    /*margin-left: 50%;*/
-    /*transform: translate(-50%,0);*/
-    /*margin-top: 15px;*/
-    /*margin-bottom: 15px;*/
     position: absolute;
     z-index: 1;
 }
@@ -83,22 +73,22 @@ body {
 }
 /*---pop up window---*/
 .notify-container {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-start;
-    align-content: flex-start;
-    position: absolute;
-    top: 0;
-    right: 0;
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    background-color: #26262c;
+    z-index: 1;
 }
 .notify-item {
-    width: 250px;
-    margin: 5px 10px;
+    width: auto;
+    height: auto;
+    margin: 25px 25px;
     color: #FFF;
     border-radius: 5px;
-    background-color: rgba(81, 163, 81, 0.4);
+    text-align: center;
 }
 .notify-item > p {
     font-family: 'Lora', serif;

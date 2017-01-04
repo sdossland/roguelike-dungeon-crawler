@@ -4,7 +4,6 @@ import Stats from './Stats';
 import Gameboard from './Gameboard';
 import Legend from './Legend';
 import './App.css';
-import Popup from './Popup';
 
 /*RULES:
 * -1 player per dungeon
@@ -63,7 +62,7 @@ function calculateDarkCells(numRows, numColumns /*, isActive*/) {
 var weapon = [
     {
         name: 'stick',
-        damage: 10
+        damage: 5
     },
     {
         name: 'brass knuckles',
@@ -142,6 +141,8 @@ function calculateBoss (x, y) {
     return bossCells;
 }
 
+//var agentCells;
+
 var Board = React.createClass({
     getInitialState: function () {
         var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
@@ -160,9 +161,11 @@ var Board = React.createClass({
           king: agentCells.slice(10, 11),
           weapon: agentCells.slice(11,12),
           //boss: [],
-          boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]), //make it 10,11 in dungeon 4
-          bossHealth: 40,
-          clicked: 'false'
+          //boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]), //make it 10,11 in dungeon 4
+          //bossHealth: 40,
+          clicked: 'false',
+          popUp: false,
+          message: ''
       });
     },
     obtainHealth: function() {
@@ -298,7 +301,7 @@ var Board = React.createClass({
             }
         }
         this.setState({ darkCells: darkCells });
-        console.log(this.state.clicked); //can do a count as well w/ odd and even
+        //console.log(this.state.clicked); //can do a count as well w/ odd and even
     },
     movePlayer: function(x, y) {
         var prevX = this.state.playerCurrentPosition[0][0];
@@ -329,29 +332,49 @@ var Board = React.createClass({
         }
         this.setState({ darkCells: darkCells });
     },
+    // resetAgentCells: function () {
+    //   this.setState({
+    //       playerCurrentPosition: [],
+    //       healthCells: [],
+    //       enemyCells: [],
+    //       king: [],
+    //       weapon: [],
+    //   }, function() {
+    //       this.setState({
+    //
+    //       })
+    //   });
+    // },
     resetGame: function() {
-        //alert("Gameover! Better luck next time!"); //create a popup window
-        this.props.showNotification(); //FIX!!!!
-        var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
-        this.setState({
-            healthStats: 100,
-            weaponStats: weapon[0].name,
-            attack: weapon[0].damage,
-            level: 0,
-            nextLevel: 60,
-            dungeon: 0,
-            cells: calculateCells(numRows, numColumns),
-            darkCells: calculateDarkCells(numRows, numColumns),
-            playerCurrentPosition: agentCells.slice(0, 1),
-            healthCells: agentCells.slice(1, 5),
-            enemyCells: agentCells.slice(5, 10),
-            king: agentCells.slice(10, 11),
-            weapon: agentCells.slice(11,12),
-            //boss: [],
-            boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]),
-            bossHealth: 40,
-            clicked: 'false'
-        });
+        //this.resetAgentCells();
+        // this.setState({
+        //         playerCurrentPosition: [],
+        //         healthCells: [],
+        //         enemyCells: [],
+        //         king: [],
+        //         weapon: [],
+        //     }, function() {
+            var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
+            this.setState({
+                healthStats: 100,
+                weaponStats: weapon[0].name,
+                attack: weapon[0].damage,
+                level: 0,
+                nextLevel: 60,
+                dungeon: 0,
+                cells: calculateCells(numRows, numColumns),
+                darkCells: calculateDarkCells(numRows, numColumns),
+                playerCurrentPosition: agentCells.slice(0, 1),
+                healthCells: agentCells.slice(1, 5),
+                enemyCells: agentCells.slice(5, 10),
+                king: agentCells.slice(10, 11),
+                weapon: agentCells.slice(11, 12),
+                //boss: [],
+                //boss: calculateBoss(agentCells.slice(12, 13)[0][0], agentCells.slice(12, 13)[0][1]),
+                //bossHealth: 40,
+                clicked: 'false'
+            });
+        // });
         this.initialCellCreation();
     },
     initialCellCreation: function() {
@@ -364,11 +387,11 @@ var Board = React.createClass({
             this.updateCells(this.state.enemyCells[i][0], this.state.enemyCells[i][1], {color: bgColors['Red'], enemyHealth: 20});
         }
         this.updateCells(this.state.king[0][0], this.state.king[0][1], {color: bgColors['Purple'], kingHealth: 40}); //king
-        //if (this.state.boss) {
+        if (this.state.boss) {
         for (var h=0; h<4; h++) {
             this.updateCells(this.state.boss[h][0], this.state.boss[h][1], {color: bgColors['DarkRed'], bossHealth: 100});
         }
-        //}
+        }
         this.updateCells(this.state.weapon[0][0], this.state.weapon[0][1], {color: bgColors['Yellow']}); //weapon
         this.scope();
     },
@@ -400,7 +423,10 @@ var Board = React.createClass({
                 }
             }
         } else {
-            this.resetGame();
+            this.setState({
+                message: "Gameover! Better luck next time!",
+                popUp: true
+        });
         }
     },
     attackKing: function (x, y) {
@@ -412,41 +438,54 @@ var Board = React.createClass({
                 this.updateCells(x, y, {kingHealth: kingHealthReduction});
             } else if (this.state.cells[x][y].kingHealth < 1) {
                 this.movePlayer(x, y);
+
+                // this.setState({
+                //     playerCurrentPosition: [],
+                //     healthCells: [],
+                //     enemyCells: [],
+                //     king: [],
+                //     weapon: [],
+                // }, function() {
+
                 var agentCells = createAgentCells(reducedNumRows, reducedNumColumns);
                 if (this.state.dungeon < 3) {
                     var dungeon = this.state.dungeon + 1;
                     this.setState({
                         dungeon: dungeon,
-                        playerCurrentPosition: agentCells.slice(0, 1)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
-                        healthCells: agentCells.slice(1, 5)/*calculateHealthAgents(numRows, numColumns)*/,
-                        enemyCells: agentCells.slice(5, 10)/*calculateEnemies(numRows, numColumns)*/,
-                        king: agentCells.slice(10, 11)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
-                        weapon: agentCells.slice(11, 12)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/
+                        playerCurrentPosition: agentCells.slice(0, 1),
+                        healthCells: agentCells.slice(1, 5),
+                        enemyCells: agentCells.slice(5, 10),
+                        king: agentCells.slice(10, 11),
+                        weapon: agentCells.slice(11, 12)
                     });
                     this.initialCellCreation();
                 } else if (this.state.dungeon === 3) {
                     dungeon = this.state.dungeon + 1;
                     this.setState({
                         dungeon: dungeon,
-                        playerCurrentPosition: agentCells.slice(0, 1)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
-                        healthCells: agentCells.slice(1, 5)/*calculateHealthAgents(numRows, numColumns)*/,
-                        enemyCells: agentCells.slice(5, 10)/*calculateEnemies(numRows, numColumns)*/,
-                        weapon: agentCells.slice(11, 12)/*[Math.round(Math.random() * numRows), Math.round(Math.random() * numColumns)]*/,
-                        //boss: calculateBoss(agentCells.slice(10, 11)[0][0], agentCells.slice(10, 11)[0][1]) /*this.calculateBoss(numRows, numColumns)*/
+                        playerCurrentPosition: agentCells.slice(0, 1),
+                        healthCells: agentCells.slice(1, 5),
+                        enemyCells: agentCells.slice(5, 10),
+                        weapon: agentCells.slice(11, 12),
+                        boss: calculateBoss(agentCells.slice(10, 11)[0][0], agentCells.slice(10, 11)[0][1]),
                         //bossHealth: 40
                     });
                     this.initialCellCreation();
-                } else if (this.state.dungeon === 4) {
-                    alert("Congratulations! You won!"); //create nicer popup here perhaps asking if they want to restart the game??
+                    // } else if (this.state.dungeon === 4) {
+                    //     alert("Congratulations! You won!"); //create nicer popup here perhaps asking if they want to restart the game??
+                    // }
                 }
-            }
+            // })
+             }
         } else {
-            alert('Gameover! Better luck next time!');
-            this.resetGame();
+            this.setState({
+                message: "Gameover! Better luck next time!",
+                popUp: true
+            });
         }
     },
-    attackBoss: function() {
-        var healthReduced = this.state.healthStats - 10;
+    attackBoss: function () {
+        var healthReduced = this.state.healthStats - 30;
         var bossHealthReduction = this.state.bossHealth - this.state.attack;
         if (this.state.healthStats > 0) {
             if (this.state.bossHealth > 0) {
@@ -454,20 +493,23 @@ var Board = React.createClass({
                     healthStats: healthReduced,
                     bossHealth: bossHealthReduction
                 });
-                console.log(this.state.bossHealth);
-                console.log("playerhealth: " + this.state.healthStats);
+                //console.log(this.state.bossHealth);
+                //console.log("playerhealth: " + this.state.healthStats);
             } else if (this.state.bossHealth < 1) {
-                alert('Congratulations!!! You defeated the boss in dungeon 4.');
-                this.resetGame();
-                //popup here that reads you are a winner! on OK, this.resetGame();
+                this.setState({
+                    message: "Congratulations!!! You defeated the boss in dungeon 4.",
+                    popUp: true
+                });
             }
         } else {
-            //alert('Gameover! Better luck next time!');
-            this.resetGame();
+            this.setState({
+                message: "Gameover! Better luck next time!",
+                popUp: true
+            });
         }
     },
   render: function() {
-    return (
+      return (
         <div>
             <h2 className="appTitle">React Roguelike</h2>
             <h5 className="appTitle">Kill the boss in dungeon 4</h5>
@@ -496,8 +538,10 @@ var Board = React.createClass({
                        attackKing={this.attackKing}
                        attackBoss={this.attackBoss}
                        initialCellCreation={this.initialCellCreation}
+                       popUp={this.state.popUp}
+                       message={this.state.message}
+                       resetGame={this.resetGame}
             />
-            <Popup />
             <Legend />
         </div>
     );

@@ -5,6 +5,7 @@ import React from 'react';
 import Cell from './Cell';
 // import { bgColors } from './App';
 import Darkness from './Darkness';
+import Popup from './Popup';
 
 var Gameboard = React.createClass({
     componentDidMount: function() {
@@ -24,7 +25,7 @@ var Gameboard = React.createClass({
     } else if (this.props.cells[x][y].color === '#4d0099') { //purple..king
         this.props.attackKing(x, y);
     } else if (this.props.cells[x][y].color === '#800000') { //dark red..boss
-        this.props.attackBoss();
+        this.props.attackBoss(x, y);
     } else if (this.props.cells[x][y].color === '#999') { //grey..board
         this.props.movePlayer(x, y);
     }
@@ -58,6 +59,10 @@ var Gameboard = React.createClass({
         return (
             <div className="gameboard" >
                 <Darkness darkCells={this.props.darkCells} />
+                <Popup popUp={this.props.popUp}
+                       message={this.props.message}
+                       resetGame={this.props.resetGame}
+                />
                 {this.props.cells.map(function(row) {
                     return row.map(function(cell) {
                         return (<Cell style={{ backgroundColor: cell.color }} />);

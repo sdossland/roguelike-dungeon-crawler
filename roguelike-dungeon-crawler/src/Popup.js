@@ -2,20 +2,32 @@
  * Created by sophia on 12/16/16.
  */
 import React from 'react';
-import ReactNotify from 'react-notify';
 
 var popUp = React.createClass({
-    showNotification: function() {
-        //this.refs.notificator.error("Title.", "Msg - body.", duration);
-        //this.refs.notificator.info("Title.", "Msg - body.", duration);
-        this.refs.notificator.success("Title.", "Msg - body.", 2000);
+    getInitialState: function () {
+        return {
+            timedOut: false
+        }
     },
+    timer: null,
     render: function() {
-        return (
-            <div>
-                <ReactNotify ref='notificator'
-                             showNotification={this.showNotification}
-                />
+        if (this.props.popUp) {
+            var that = this;
+            this.timer =
+                setInterval(
+                    function() {
+                        that.setState({timedOut: true}, function() {
+                            clearInterval(that.timer);
+                            this.props.resetGame();
+                        })
+                    },
+                    5000);
+        }
+        return this.props.popUp && !this.state.timedOut && (
+            <div className="notify-container">
+                <div className="notify-item">
+                    {this.props.message}
+                </div>
             </div>
         );
     }
